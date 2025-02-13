@@ -71,8 +71,11 @@ def create_interface():
                     - Uwzględnia perfect sets i good sets jako udane
                     - Im wyższa wartość, tym lepsze rozegranie
                     
-                    **Skuteczność przyjęcia** = (dobre przyjęcia + średnie przyjęcia) / wszystkie przyjęcia * 100%
-                    - Uwzględnia zarówno dobre jak i średnie przyjęcia jako udane
+                    **Skuteczność przyjęcia** = (idealne * 100% + dość dobre * 66% + słabe * 33% - asy przeciwnika * 100%) / wszystkie przyjęcia * 100%
+                    - Idealne przyjęcia liczą się w pełni
+                    - Dość dobre przyjęcia liczą się jako 66% udanego przyjęcia
+                    - Słabe przyjęcia liczą się jako 33% udanego przyjęcia
+                    - Asy przeciwnika odejmują 100% od skuteczności
                     - Im wyższa wartość, tym lepsze przyjęcie
                     
                     **Skuteczność ataku** = punkty z ataku / (punkty + błędy) * 100%

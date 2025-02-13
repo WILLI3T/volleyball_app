@@ -9,16 +9,17 @@ def create_plots(df):
     
     # Obliczanie procentowego udziału dla każdego typu przyjęcia
     for idx, row in df.iterrows():
-        total = row['Dobre przyjęcia'] + row['Średnie przyjęcia'] + row['Złe przyjęcia']
+        total = row['Dobre przyjęcia'] + row['Średnie przyjęcia'] + row['Złe przyjęcia'] + row['Przyjęte asy']
         if total > 0:
             good_percent = (row['Dobre przyjęcia'] / total) * 100
             ok_percent = (row['Średnie przyjęcia'] / total) * 100
             bad_percent = (row['Złe przyjęcia'] / total) * 100
+            ace_percent = (row['Przyjęte asy'] / total) * 100
             
-            # Dodawanie adnotacji z liczbą przyjęć - przesunięte wyżej
+            # Dodawanie adnotacji z liczbą przyjęć
             fig_receive.add_annotation(
                 x=row['Gracz'],
-                y=115,  # Przesunięte wyżej
+                y=115,
                 text=f'Łącznie: {total}',
                 showarrow=False,
                 font=dict(size=10)
@@ -46,13 +47,23 @@ def create_plots(df):
                 showlegend=idx == 0
             ))
             fig_receive.add_trace(go.Bar(
-                name='Złe przyjęcia',
+                name='Słabe przyjęcia',
                 x=[row['Gracz']],
                 y=[bad_percent],
-                marker_color='rgb(255, 0, 0)',
+                marker_color='rgb(255, 140, 0)',
                 text=[f'{int(row["Złe przyjęcia"])}'],
                 textposition='inside',
                 legendgroup='bad',
+                showlegend=idx == 0
+            ))
+            fig_receive.add_trace(go.Bar(
+                name='Stracone punkty',
+                x=[row['Gracz']],
+                y=[ace_percent],
+                marker_color='rgb(255, 0, 0)',
+                text=[f'{int(row["Przyjęte asy"])}'],
+                textposition='inside',
+                legendgroup='ace',
                 showlegend=idx == 0
             ))
     
@@ -61,16 +72,14 @@ def create_plots(df):
         yaxis_title='Procent przyjęć (%)',
         barmode='stack',
         showlegend=True,
-        yaxis_range=[0, 120],  # Zwiększony zakres osi Y
+        yaxis_range=[0, 120],
         legend=dict(
             yanchor="top",
             y=0.99,
             xanchor="right",
             x=0.99
         ),
-        margin=dict(t=50, b=50),  # Dodatkowy margines
-        uniformtext_minsize=10,
-        uniformtext_mode='hide'
+        margin=dict(t=50, b=50)
     )
     
     # Nowy wykres dla setów
@@ -84,7 +93,6 @@ def create_plots(df):
             playable_percent = (row['Playable set'] / total_sets) * 100
             bad_percent = (row['Bad set'] / total_sets) * 100
             
-            # Dodawanie adnotacji z łączną liczbą setów
             fig_sets.add_annotation(
                 x=row['Gracz'],
                 y=115,
@@ -93,12 +101,10 @@ def create_plots(df):
                 font=dict(size=10)
             )
             
-            # Dodawanie słupków z procentami
             fig_sets.add_trace(go.Bar(
                 name='Perfect set',
-                x=[row['Gracz']],
-                y=[perfect_percent],
-                marker_color='rgb(15, 142, 0)',  # Ciemny zielony
+                x=[row['Gracz']], y=[perfect_percent],
+                marker_color='rgb(15, 142, 0)',
                 text=[f'{int(row["Perfect set"])}'],
                 textposition='inside',
                 legendgroup='perfect',
@@ -106,9 +112,8 @@ def create_plots(df):
             ))
             fig_sets.add_trace(go.Bar(
                 name='Good set',
-                x=[row['Gracz']],
-                y=[good_percent],
-                marker_color='rgb(76, 175, 80)',  # Jaśniejszy zielony
+                x=[row['Gracz']], y=[good_percent],
+                marker_color='rgb(76, 175, 80)',
                 text=[f'{int(row["Good set"])}'],
                 textposition='inside',
                 legendgroup='good',
@@ -116,9 +121,8 @@ def create_plots(df):
             ))
             fig_sets.add_trace(go.Bar(
                 name='Playable set',
-                x=[row['Gracz']],
-                y=[playable_percent],
-                marker_color='rgb(255, 191, 0)',  # Żółty
+                x=[row['Gracz']], y=[playable_percent],
+                marker_color='rgb(255, 191, 0)',
                 text=[f'{int(row["Playable set"])}'],
                 textposition='inside',
                 legendgroup='playable',
@@ -126,9 +130,8 @@ def create_plots(df):
             ))
             fig_sets.add_trace(go.Bar(
                 name='Bad set',
-                x=[row['Gracz']],
-                y=[bad_percent],
-                marker_color='rgb(255, 0, 0)',  # Czerwony
+                x=[row['Gracz']], y=[bad_percent],
+                marker_color='rgb(255, 0, 0)',
                 text=[f'{int(row["Bad set"])}'],
                 textposition='inside',
                 legendgroup='bad',
@@ -140,7 +143,7 @@ def create_plots(df):
         yaxis_title='Procent setów (%)',
         barmode='stack',
         showlegend=True,
-        yaxis_range=[0, 120],  # Zwiększony zakres osi Y dla adnotacji
+        yaxis_range=[0, 120],
         legend=dict(
             yanchor="top",
             y=0.99,
@@ -156,25 +159,23 @@ def create_plots(df):
     for idx, row in df.iterrows():
         attacks = row['Punkty z ataku']
         aces = row['Asy']
-        serve_points = row['Punkty z zagrywki']
-        total_points = attacks + aces + serve_points
+        blocks = row['Bloki']
+        total_points = attacks + aces + blocks
         
         if total_points > 0:
-            # Dodawanie adnotacji z łączną liczbą punktów
             fig_scored.add_annotation(
                 x=row['Gracz'],
-                y=total_points + 2,  # Trochę powyżej słupka
+                y=total_points + 2,
                 text=f'Łącznie: {total_points}',
                 showarrow=False,
                 font=dict(size=10)
             )
             
-            # Dodawanie słupków
             fig_scored.add_trace(go.Bar(
                 name='Atak',
                 x=[row['Gracz']],
                 y=[attacks],
-                marker_color='rgb(19, 102, 10)',  # Zielony
+                marker_color='rgb(19, 102, 10)',
                 text=[f'{int(attacks)}'],
                 textposition='inside',
                 legendgroup='attacks',
@@ -184,20 +185,20 @@ def create_plots(df):
                 name='Asy',
                 x=[row['Gracz']],
                 y=[aces],
-                marker_color='rgb(76, 175, 80)',  # Jaśniejszy zielony
+                marker_color='rgb(76, 175, 80)',
                 text=[f'{int(aces)}'],
                 textposition='inside',
                 legendgroup='aces',
                 showlegend=idx == 0
             ))
             fig_scored.add_trace(go.Bar(
-                name='Punkty z zagrywki',
+                name='Bloki',
                 x=[row['Gracz']],
-                y=[serve_points],
-                marker_color='rgb(159, 201, 135)',  # Najjaśniejszy zielony
-                text=[f'{int(serve_points)}'],
+                y=[blocks],
+                marker_color='rgb(129, 199, 132)',
+                text=[f'{int(blocks)}'],
                 textposition='inside',
-                legendgroup='serve_points',
+                legendgroup='blocks',
                 showlegend=idx == 0
             ))
     
@@ -215,29 +216,27 @@ def create_plots(df):
         margin=dict(t=50, b=50)
     )
     
-    # Zmodyfikowany wykres straconych punktów
+    # Wykres straconych punktów
     fig_lost = go.Figure()
     
     for idx, row in df.iterrows():
         net_attacks = row['Atak w siatkę']
         outs = row['Aut']
-        serve_errors = row['Błędy zagrywki']
-        receive_outs = row['Receive out']
-        enemy_aces = row['Enemy ace']
-        enemy_blocks = row['Enemy block']
-        total_errors = net_attacks + outs + serve_errors + receive_outs + enemy_aces + enemy_blocks
+        serve_errors = row['Zagrywka w siatkę'] + row['Zagrywka na aut']
+        receive_outs = row['Złe przyjęcia']
+        enemy_aces = row['Przyjęte asy']
+        other_lost = row['Stracone punkty (inne)']
+        total_errors = net_attacks + outs + serve_errors + receive_outs + enemy_aces + other_lost
         
         if total_errors > 0:
-            # Dodawanie adnotacji z łączną liczbą błędów
             fig_lost.add_annotation(
                 x=row['Gracz'],
                 y=total_errors + 2,
-                text=f'Łącznie: {total_errors}',
+                text=f'Łącznie: {row["Suma straconych"]}',
                 showarrow=False,
                 font=dict(size=10)
             )
             
-            # Dodawanie słupków
             fig_lost.add_trace(go.Bar(
                 name='Atak w siatkę',
                 x=[row['Gracz']], y=[net_attacks],
@@ -266,16 +265,7 @@ def create_plots(df):
                 showlegend=idx == 0
             ))
             fig_lost.add_trace(go.Bar(
-                name='Receive out',
-                x=[row['Gracz']], y=[receive_outs],
-                marker_color='rgb(156, 39, 176)',
-                text=[f'{int(receive_outs)}'],
-                textposition='inside',
-                legendgroup='receive_outs',
-                showlegend=idx == 0
-            ))
-            fig_lost.add_trace(go.Bar(
-                name='Enemy ace',
+                name='Asy przeciwnika',
                 x=[row['Gracz']], y=[enemy_aces],
                 marker_color='rgb(63, 81, 181)',
                 text=[f'{int(enemy_aces)}'],
@@ -284,12 +274,12 @@ def create_plots(df):
                 showlegend=idx == 0
             ))
             fig_lost.add_trace(go.Bar(
-                name='Enemy block',
-                x=[row['Gracz']], y=[enemy_blocks],
-                marker_color='rgb(0, 150, 136)',
-                text=[f'{int(enemy_blocks)}'],
+                name='Inne stracone',
+                x=[row['Gracz']], y=[other_lost],
+                marker_color='rgb(156, 39, 176)',
+                text=[f'{int(other_lost)}'],
                 textposition='inside',
-                legendgroup='enemy_blocks',
+                legendgroup='other_lost',
                 showlegend=idx == 0
             ))
     
@@ -307,7 +297,6 @@ def create_plots(df):
         margin=dict(t=50, b=50)
     )
     
-    # Return only the remaining plots
     return fig_receive, fig_sets, fig_scored, fig_lost
 
 def create_trend_plot(selected_files, all_stats):
@@ -325,8 +314,13 @@ def create_trend_plot(selected_files, all_stats):
             'good_receives': 0,
             'ok_receives': 0,
             'bad_receives': 0,
+            'enemy_aces': 0,
             'attacks': 0,
-            'attack_errors': 0
+            'attack_errors': 0,
+            'aces': 0,
+            'serve_errors': 0,
+            'scored_points': 0,
+            'lost_points': 0
         }
         
         # Sumuj statystyki wszystkich graczy
@@ -337,27 +331,47 @@ def create_trend_plot(selected_files, all_stats):
             team_stats['good_receives'] += player_stats.get('good receive', 0)
             team_stats['ok_receives'] += player_stats.get('ok receive', 0)
             team_stats['bad_receives'] += player_stats.get('bad receive', 0)
+            team_stats['enemy_aces'] += player_stats.get('enemy ace', 0)
             team_stats['attacks'] += player_stats.get('attack', 0)
             team_stats['attack_errors'] += (player_stats.get('attack net', 0) + 
                                           player_stats.get('out', 0))
+            team_stats['aces'] += player_stats.get('ace', 0)
+            team_stats['serve_errors'] += (player_stats.get('serve net', 0) + 
+                                         player_stats.get('serve out', 0))
+            team_stats['scored_points'] += player_stats.get('scored points', 0)
+            team_stats['lost_points'] += player_stats.get('lost points', 0)
         
         # Oblicz skuteczności
         total_sets = team_stats['perfect_sets'] + team_stats['good_sets'] + team_stats['bad_sets']
         set_efficiency = ((team_stats['perfect_sets'] + team_stats['good_sets']) / total_sets * 100 
                          if total_sets > 0 else 0)
         
-        total_receives = team_stats['good_receives'] + team_stats['ok_receives'] + team_stats['bad_receives']
-        receive_efficiency = ((team_stats['good_receives'] + team_stats['ok_receives']) / total_receives * 100 
-                            if total_receives > 0 else 0)
+        total_receives = (team_stats['good_receives'] + team_stats['ok_receives'] + 
+                         team_stats['bad_receives'] + team_stats['enemy_aces'])
+        
+        if total_receives > 0:
+            receive_efficiency = ((team_stats['good_receives'] * 1.0 + 
+                                 team_stats['ok_receives'] * 0.66 + 
+                                 team_stats['bad_receives'] * 0.33 - 
+                                 team_stats['enemy_aces'] * 1.0) / total_receives * 100)
+        else:
+            receive_efficiency = 0
         
         total_attacks = team_stats['attacks'] + team_stats['attack_errors']
         attack_efficiency = (team_stats['attacks'] / total_attacks * 100 
                            if total_attacks > 0 else 0)
         
+        total_serves = team_stats['aces'] + team_stats['serve_errors']
+        serve_efficiency = (team_stats['aces'] / total_serves * 100 
+                          if total_serves > 0 else 0)
+        
         training_data.append({
             'set_efficiency': set_efficiency,
             'receive_efficiency': receive_efficiency,
-            'attack_efficiency': attack_efficiency
+            'attack_efficiency': attack_efficiency,
+            'serve_efficiency': serve_efficiency,
+            'scored_points': team_stats['scored_points'],
+            'lost_points': team_stats['lost_points']
         })
 
     # Stwórz wykres
@@ -395,7 +409,7 @@ def create_trend_plot(selected_files, all_stats):
         title='Trendy skuteczności drużyny',
         xaxis_title='Data treningu',
         yaxis_title='Skuteczność (%)',
-        yaxis_range=[0, 100],
+        yaxis_range=[-20, 100],
         showlegend=True,
         legend=dict(
             yanchor="top",
